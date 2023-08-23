@@ -1,0 +1,220 @@
+<html>
+	<head>
+		<title>Particle Words</title>
+		<style type="text/css">
+			body {margin: 0; }
+			canvas {width: 100%; height:100% ;}
+			#myText {position: absolute; left: 45%; top: 75%;}
+		</style>
+	</head>
+	<body>
+		<canvas id="particleScreen" width="1600" height="900" style="border:1px solid #000000;"></canvas>
+
+		<script src="Particles.js" type="text/javascript"></script>
+		<script src="Vector2.js" type="text/javascript"></script>
+		<script>
+			//////Main
+
+			var canvas = document.getElementById("particleScreen");
+			var context = canvas.getContext("2d");
+			var img;
+			var startingTime = Date.now();
+			var frameTime = Date.now() - startingTime;
+			var deltaTime = 0;
+			var particleColor = "#00ffe9";
+
+
+			var sWC = canvas.width / 2;		//Canvas Width Center
+			var sHC = canvas.height / 2;	//Canvas Height Center
+
+			var x_offset= 0;
+			var y_offset= 450;
+			var letterList = [];
+
+			context.beginPath();
+			context.rect(0, 0, canvas.width, canvas.height);
+			context.fillStyle = "black";
+			context.fill();
+
+			var leftXOffset = canvas.width / 2 - 50;
+			//var letterSpacing;
+
+
+			var particleList = [];
+			for(var i = 0; i < 150; i++){
+				particleList.push(new Particle(0,0, "null", 0));
+			}
+
+			//100x100
+			var letterHash = {
+				"null" : [new Vector2(sWC,sHC - 50), new Vector2(sWC, sHC + 50), new Vector2(sWC + 50, sHC), new Vector2(sWC - 50, sHC)],
+				"A" : [new Vector2(x_offset + 0,y_offset + 50), new Vector2(x_offset + 50,y_offset - 50), new Vector2(x_offset + 100,y_offset + 50), new Vector2(x_offset + 75,y_offset), new Vector2(x_offset + 25,y_offset)],
+				"B" : [new Vector2(x_offset + 0,y_offset - 50), new Vector2(x_offset + 75,y_offset - 25), new Vector2(x_offset + 0,y_offset + 0), new Vector2(x_offset + 75,y_offset + 25), new Vector2(x_offset + 0,y_offset + 50)],
+				"C" : [new Vector2(x_offset + 0,y_offset - 25), new Vector2(x_offset + 100,y_offset - 50), new Vector2(x_offset + 0,y_offset - 25), new Vector2(x_offset + 0,y_offset + 25), new Vector2(x_offset + 100,y_offset + 50), new Vector2(x_offset + 0,y_offset + 25)],
+				"D" : [new Vector2(x_offset + 0,y_offset - 50), new Vector2(x_offset + 0,y_offset + 50), new Vector2(x_offset + 100,y_offset + 25), new Vector2(x_offset + 100,y_offset - 25), ],
+				"E" : [new Vector2(x_offset + 50,y_offset), new Vector2(x_offset + 0,y_offset), new Vector2(x_offset + 0,y_offset - 50), new Vector2(x_offset + 100,y_offset - 50), new Vector2(x_offset + 0,y_offset - 50), new Vector2(x_offset + 0,y_offset + 50), new Vector2(x_offset + 100,y_offset + 50), new Vector2(x_offset + 0,y_offset + 50), new Vector2(x_offset + 0,y_offset)],
+				"F" : [new Vector2(x_offset,y_offset - 50), new Vector2(x_offset + 100,y_offset - 50), new Vector2(x_offset,y_offset - 50), new Vector2(x_offset,y_offset), new Vector2(x_offset + 50,y_offset),new Vector2(x_offset,y_offset), new Vector2(x_offset,y_offset+ 50)],
+				"G" : [new Vector2(x_offset + 100,y_offset - 50), new Vector2(x_offset,y_offset - 25), new Vector2(x_offset + 0,y_offset + 25), new Vector2(x_offset + 100,y_offset + 50), new Vector2(x_offset + 100,y_offset), new Vector2(x_offset + 50,y_offset), new Vector2(x_offset + 100,y_offset), new Vector2(x_offset + 100,y_offset + 50), new Vector2(x_offset,y_offset + 25), new Vector2(x_offset + 0,y_offset - 25)],
+				"H" : [new Vector2(x_offset,y_offset), new Vector2(x_offset,y_offset - 50), new Vector2(x_offset,y_offset + 50), new Vector2(x_offset,y_offset), new Vector2(x_offset + 100,y_offset), new Vector2(x_offset + 100 ,y_offset - 50), new Vector2(x_offset + 100,y_offset + 50), new Vector2(x_offset + 100,y_offset)],
+				"I" : [new Vector2(x_offset + 50,y_offset - 50), new Vector2(x_offset,y_offset - 50), new Vector2(x_offset + 100,y_offset - 50), new Vector2(x_offset + 50,y_offset - 50), new Vector2(x_offset + 50,y_offset + 50), new Vector2(x_offset + 100 ,y_offset + 50), new Vector2(x_offset,y_offset + 50), new Vector2(x_offset + 50,y_offset + 50)],
+				"J" : [new Vector2(x_offset + 50,y_offset - 50), new Vector2(x_offset,y_offset - 50), new Vector2(x_offset + 100,y_offset - 50), new Vector2(x_offset + 50,y_offset - 50), new Vector2(x_offset + 50,y_offset + 25), new Vector2(x_offset + 25,y_offset + 50), new Vector2(x_offset,y_offset + 25), new Vector2(x_offset + 25,y_offset + 50), new Vector2(x_offset + 50,y_offset + 25)],
+				"K" : [new Vector2(x_offset,y_offset - 50), new Vector2(x_offset,y_offset + 50), new Vector2(x_offset,y_offset), new Vector2(x_offset + 75,y_offset - 50), new Vector2(x_offset,y_offset), new Vector2(x_offset + 75,y_offset + 50), new Vector2(x_offset,y_offset)],
+				"L" : [new Vector2(x_offset,y_offset - 50), new Vector2(x_offset,y_offset + 50), new Vector2(x_offset + 100,y_offset + 50), new Vector2(x_offset,y_offset + 50)],
+				"M" : [new Vector2(x_offset,y_offset + 50), new Vector2(x_offset,y_offset - 50), new Vector2(x_offset + 50,y_offset + 50), new Vector2(x_offset + 100,y_offset - 50), new Vector2(x_offset + 100,y_offset + 50), new Vector2(x_offset + 100,y_offset - 50), new Vector2(x_offset + 50,y_offset + 50), new Vector2(x_offset,y_offset - 50)],
+				"N" : [new Vector2(x_offset,y_offset + 50), new Vector2(x_offset,y_offset - 50), new Vector2(x_offset + 100,y_offset + 50), new Vector2(x_offset + 100,y_offset - 50), new Vector2(x_offset + 100,y_offset + 50), new Vector2(x_offset,y_offset - 50)],
+				"O" : [new Vector2(x_offset + 50,y_offset - 50), new Vector2(x_offset + 100,y_offset), new Vector2(x_offset + 50,y_offset + 50), new Vector2(x_offset,y_offset)],
+				"P" : [new Vector2(x_offset,y_offset - 50), new Vector2(x_offset + 100,y_offset - 25), new Vector2(x_offset,y_offset), new Vector2(x_offset,y_offset + 50)],
+				"Q" : [new Vector2(x_offset + 50,y_offset - 50), new Vector2(x_offset + 100,y_offset), new Vector2(x_offset + 75,y_offset + 25), new Vector2(x_offset + 50,y_offset), new Vector2(x_offset + 100,y_offset + 50), new Vector2(x_offset + 75,y_offset + 25), new Vector2(x_offset + 50,y_offset + 50), new Vector2(x_offset,y_offset)],
+				"R" : [new Vector2(x_offset,y_offset - 50), new Vector2(x_offset + 100,y_offset - 25), new Vector2(x_offset,y_offset), new Vector2(x_offset + 100,y_offset + 50), new Vector2(x_offset,y_offset), new Vector2(x_offset,y_offset + 50)],
+				"S" : [new Vector2(x_offset + 100,y_offset - 50), new Vector2(x_offset,y_offset - 20), new Vector2(x_offset + 100,y_offset + 20), new Vector2(x_offset,y_offset + 50), new Vector2(x_offset + 100,y_offset + 20), new Vector2(x_offset,y_offset - 20)],
+				"T" : [new Vector2(x_offset + 50,y_offset - 50), new Vector2(x_offset,y_offset - 50), new Vector2(x_offset + 100,y_offset - 50), new Vector2(x_offset + 50,y_offset - 50), new Vector2(x_offset+ 50,y_offset + 50)],
+				"U" : [new Vector2(x_offset,y_offset + 25), new Vector2(x_offset,y_offset - 50), new Vector2(x_offset,y_offset + 25), new Vector2(x_offset + 50,y_offset + 50), new Vector2(x_offset + 100,y_offset + 25), new Vector2(x_offset + 100,y_offset - 50), new Vector2(x_offset + 100,y_offset + 25), new Vector2(x_offset + 50,y_offset + 50)],
+				"V" : [new Vector2(x_offset,y_offset - 50), new Vector2(x_offset + 50,y_offset + 50), new Vector2(x_offset + 100,y_offset + 50), new Vector2(x_offset + 50,y_offset - 50)],
+				"W" : [new Vector2(x_offset,y_offset - 50), new Vector2(x_offset + 25,y_offset + 50), new Vector2(x_offset + 50,y_offset), new Vector2(x_offset + 75,y_offset + 50), new Vector2(x_offset + 100,y_offset - 50), new Vector2(x_offset + 75,y_offset + 50), new Vector2(x_offset + 50,y_offset), new Vector2(x_offset + 25,y_offset + 50)],
+				"X" : [new Vector2(x_offset + 50,y_offset), new Vector2(x_offset + 100,y_offset - 50), new Vector2(x_offset,y_offset + 50), new Vector2(x_offset + 50,y_offset), new Vector2(x_offset,y_offset - 50), new Vector2(x_offset + 100,y_offset + 50)],
+				"Y" : [new Vector2(x_offset,y_offset - 50), new Vector2(x_offset + 50,y_offset), new Vector2(x_offset + 100,y_offset - 50), new Vector2(x_offset + 50,y_offset), new Vector2(x_offset + 50,y_offset + 50), new Vector2(x_offset + 50,y_offset)],
+				"Z" : [new Vector2(x_offset,y_offset - 50), new Vector2(x_offset + 100,y_offset - 50), new Vector2(x_offset,y_offset + 50), new Vector2(x_offset + 100,y_offset + 50), new Vector2(x_offset,y_offset + 50), new Vector2(x_offset + 100,y_offset - 50)],
+			}
+
+			//Mouse Input For Color Picker
+			window.addEventListener("mousedown", colorPicker);
+		function colorPicker(e){
+			console.log(e);
+			if(e.y > 0 && e.y < window.innerHeight/20){
+
+				if(e.x >= 0 && e.x < window.innerWidth/8)
+					particleColor = "#ff0000";
+				else if( e.x >= window.innerWidth/8 && e.x < window.innerWidth/4)
+					particleColor = "#ff8300";
+				else if(e.x >= window.innerWidth/4 && e.x < window.innerWidth/8 * 3)
+					particleColor = "#f6ff00";
+				else if(e.x >= window.innerWidth/8 * 3 && e.x < window.innerWidth/2)
+					particleColor = "#10c400";
+				else if(e.x >= window.innerWidth/2 && e.x < window.innerWidth/8 * 5)
+					particleColor = "#00ffe9";
+				else if(e.x >= window.innerWidth/8 * 5 && e.x < window.innerWidth/4 * 3)
+					particleColor = "#0021ff";
+				else if(e.x >= window.innerWidth/4 * 3 && e.x < window.innerWidth/8 * 7)
+					particleColor = "#e500ff";
+				else if(e.x >= window.innerWidth/8 * 7 && e.x < window.innerWidth)
+					particleColor = "#ffffff";
+
+			}
+
+		}
+
+			//The Main Loop
+			function start(){
+				window.requestAnimationFrame(start);
+
+				frameTime = Date.now() - startingTime;
+				if(frameTime - deltaTime > 1000/60){
+					//console.log(frameTime -deltaTime);
+					deltaTime = frameTime;
+					context.clearRect(0, 0, canvas.width, canvas.height);
+					context.beginPath();
+					context.rect(0, 0, canvas.width, canvas.height);
+					context.fillStyle = "black";
+					context.fill();
+
+				}
+				DrawTopBar();
+					for(var n = 0; n<particleList.length; n++){
+						particleList[n].move();
+					}
+				
+
+				// 1000/60 1 Frame give or take start - current time 
+				
+			}
+
+			//Reads submitted word
+			function readWord(){
+				letterList = [];
+				var n = document.getElementById("Word").value;
+				for(var i = 0; i < n.length; i++){
+					letterList.push(n.charAt(i));
+				}
+				console.log("worked?");
+				particleList = [];
+				leftXOffset = (canvas.width / (letterList.length + 1)) - 50;
+				for(var i = 0; i < letterList.length; i++){
+					for(var j = 0; j < 150; j++){
+						particleList.push(new Particle(800,400, letterList[i], leftXOffset + ((i * 125 ))));  // leftXOffset + (i * 100 + 30)
+						console.log(leftXOffset + ((i * 100 + 30)));
+					}
+				}
+				
+				start();
+
+			}
+
+			//Forces capital letters in text field
+			function cap(){
+				console.log("wut");
+				document.getElementById("Word").value = document.getElementById("Word").value.toUpperCase();
+			}
+
+			//Restricts the text field to letters only
+			function alpha(e){
+				console.log(e.which)
+				if((e.which > 64 && e.which < 91) || (e.which > 96 && e.which < 123 || e.which == 8 || e.which == 46 || e.which > 36 && e.which < 41))
+					return true;
+				else
+					return false;
+			}
+
+			//Draws the particles' shape. A 4 point Diamond shape.
+			function draw_Shape(x,y){
+				context.beginPath();
+				context.moveTo(x,y-8);
+				context.lineTo(x+8,y);
+				context.lineTo(x,y+8);
+				context.lineTo(x-8,y);
+				context.lineTo(x,y-8);
+				context.fillStyle = particleColor;
+				context.fill();
+			}
+
+			//Creates the colored boxes at the top of the screen, allowing color selection
+			function DrawTopBar(){
+
+					context.fillStyle = "#ff0000";
+				context.fillRect(0,0,canvas.width/8,canvas.height/20);
+					context.fillStyle = "#ff8300";
+				context.fillRect(canvas.width/8,0,canvas.width/4,canvas.height/20);
+					context.fillStyle = "#f6ff00";
+				context.fillRect(canvas.width/4,0,canvas.width/8 * 3,canvas.height/20);
+					context.fillStyle = "#10c400";
+				context.fillRect(canvas.width/8 * 3,0,canvas.width/2,canvas.height/20);
+					context.fillStyle = "#00ffe9";
+				context.fillRect(canvas.width/2,0,canvas.width/8 * 5,canvas.height/20);
+					context.fillStyle = "#0021ff";
+				context.fillRect(canvas.width/8 * 5,0,canvas.width/4 * 3,canvas.height/20);
+					context.fillStyle = "#e500ff";
+				context.fillRect(canvas.width/4 * 3,0,canvas.width/8 * 7,canvas.height/20);
+					context.fillStyle = "#ffffff";
+				context.fillRect(canvas.width/8 * 7,0,canvas.width,canvas.height/20);
+
+}
+
+			//Loads a sprite image. Runs the program once the sprite loads into the page.
+			//Currently not using sprite as I wanted to make more use of the canvas draw capabilities.
+			img = new Image();
+			img.addEventListener('load', start());
+			img.src = 'shine.png';
+			//draw_Shape(100,100);
+
+			
+
+
+
+
+		</script>
+		<div id="myText">
+		<input type="text" id="Word" maxlength="12" onkeydown="return alpha(event)" onkeyup="cap()"></input>
+		<input type="button" id="myButton" value="Submit" onclick="readWord()" ></input>
+		</div>
+
+	</body>
+</html>
